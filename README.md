@@ -48,6 +48,34 @@ First, download the package off github. Next, go to the [discord developer porta
 First, create a channel in the discord server you invited the bot to. This channel will be used to broadcast messages from the minecraft servers onto discord. Next, go into the advanced tab in your discord settings and enable developer mode. Now, rightclick the channel you just created, and copy its id, then set the `chatbridgechanid` variable in `main.py` using it. Copy the bots id, and do the same with the `botid` variable. Now, navigate to the folder in which the `world` folder, `fabric-server-launch` file and the `server.properties` file of your smp is located. Spawn a new python shell here, and type `import os`, then do `os.getcwd()`. Now, copy the path and add a backslash after the last character. Take this value and use it to set the `smppath` variable. Repeat this process for the cmp server/`cmppath` var. Now navigate back to where we got the path for smp, and open the `server.properties` file. Locate the `rcon.password` and `rcon.port` values, and set them accordingly. Now, set the `smprconpass` and `smprconport` to the same values as you did for the variables in `server.properties`. Repeat for cmp. All thats left is just to fill in the ips of the servers and start the bot. Once you do so, make sure both servers are off, and that the bot can access the channel you set as the chatbridge channel. Start the servers using /startsmp and /startcmp. After a few moments, you should get a bunch of messages in the channel saying the servers have successfully started. You can try out the /ping command or /execute command too to make sure rcon is working correctly. Congratulations! Chabridge is now working.
 
 ---
+Planned features
+---
+*Pasted from discord*
+
+**planner**
+- [ ] get gnome to finish mst algo
+- [ ] finish the subnet thing, tho i have to consult gnome on this (also do clustering)
+
+**scoreboard**
+- [ ] finish/fix scoreboard and name mode
+
+**applications**
+- [ ] add ticketing capabilities, make it auto create tickets from form
+- [ ] make it automatically create a vote
+
+**chatbridge**
+- [ ] add reply in mc feature
+
+**scripting**
+- [ ] add command for creating scripts, adding lines to scripts, deleting lines from scripts, deleting scripts, running scripts, listing scripts, adding descriptions, showing script info
+
+**others**
+- [ ] help command
+- [ ] "n days since someone broke the constellation bot" status
+- [ ] mqtt nugg chatbridge
+- [ ] docker container based stdout and server control 
+
+---
 User defined variables
 ---
 Before you can start using the bot, you need to fill these variables (only fill out the one you need, provided you wont use the other functions):
