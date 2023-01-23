@@ -402,7 +402,7 @@ async def self(interaction: discord.Interaction):
                     tps1 = 20.0
                 else:
                     tps1 = 1000.0 / float(a[1])
-            embedVar.add_field(name="SMP", value=f"SMP is `online ({round(float(a[1]), 2)} ms, {round(tps1, 2)} tps)`\nThere are currently `{smpstatus.players.online}` players online `({', '.join(smpquery.players.names)})`", inline=False)
+            embedVar.add_field(name="SMP", value=f"SMP is `online ({round(float(a[1]), 2)} mspt, {round(tps1, 2)} tps)`\nThere are currently `{smpstatus.players.online}` players online `({', '.join(smpquery.players.names)})`", inline=False)
         except ConnectionRefusedError:
             embedVar.add_field(name="SMP", value=f"SMP is `offline`", inline=False)
         try:
