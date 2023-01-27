@@ -41,7 +41,7 @@ Available commands
 Getting started
 ---
 **Installing the bot**
-First, download the package off github. Next, go to the [discord developer portal](https://discord.com/developers/applications) and create an application. Create a bot, and enable the message content privileged intent. **Making the bot private is highly recommended**, as the bot can modify the files on your server. Now you can invite the bot. Open the `main.py` file you downloaded in the first step, and fill out the `bottoken` variable with the token we obtained from the developer portal. Now, you are ready to run the bot (if you want to use features from the server category, you need to complete the steps in the Setting up server functionality section of this article).
+First, download the package off github. Next, go to the [discord developer portal](https://discord.com/developers/applications) and create an application. Create a bot, and enable the message content privileged intent. **Making the bot private is highly recommended**, as the bot can modify the files on your server. Now you can invite the bot. Open the `main.py` file you downloaded in the first step, and fill out the `bottoken` variable with the token we obtained from the developer portal. Next, fill out the `guildid` variable by rightclicking the server icon and pressing copy id, then using the value to set the variable. If you need more help, check out the Setting up server functionality section of this article. Now, you are ready to run the bot (if you want to use features from the server category, you need to complete the steps in the Setting up server functionality section of this article).
 
 **Setting up server functionality**
 *If you wish to use the functions outlined in the server category, please follow these steps. Prerequisites: 2 fabric minecraft servers running [carpet mod](https://github.com/gnembon/fabric-carpet), with the proper rcon and main ports accessible from the bots enviroment, a discord server that the bot will be setup in.*
@@ -62,15 +62,15 @@ Planned features
 **applications**
 - [ ] add ticketing capabilities, make it auto create tickets from form
 - [ ] make it automatically create a vote
+- [ ] parse google forms response
 
 **chatbridge**
-- [ ] add reply in mc feature
+- [x] add reply in mc feature
 
 **scripting**
 - [ ] add command for creating scripts, adding lines to scripts, deleting lines from scripts, deleting scripts, running scripts, listing scripts, adding descriptions, showing script info
 
 **others**
-- [ ] help command
 - [ ] "n days since someone broke the constellation bot" status
 - [ ] mqtt nugg chatbridge
 - [ ] docker container based stdout and server control 
@@ -80,7 +80,8 @@ User defined variables
 ---
 Before you can start using the bot, you need to fill these variables (only fill out the one you need, provided you wont use the other functions):
 
-> **bottoken** = "*random string of symbols you get from the developer portal*" ***required***
+> **guildid** = *the user id of the guild the bot will operate in, example: 1003365626825408604* ***required***
+**bottoken** = "*random string of symbols you get from the developer portal*" ***required***
 **botid** = *the user id of the bot, example: 1027583573378736128* ***required for chatbridge***
 **chatbridgechanid** = *the id of the channel you want messages from the mc servers to be sent to, example: 1051774768518549545* ***required for mc to discord chatbridge***
 **smppath** = *the path in which the fabric server executable and the world file for the smp server can be found, example: r"/home/ubuntu/servers/smp"* ***required for smp out chatbridge, stat command***

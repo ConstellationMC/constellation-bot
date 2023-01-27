@@ -1,11 +1,7 @@
-from doctest import OutputChecker
-import time, discord, socket, platform, subprocess, json, os, shutil, csv, random, typing, asyncio, mojang
+import time, discord, socket, subprocess, json, os, csv, random, typing, asyncio, mojang, psutil
 from mcrcon import MCRcon
 from discord import *
-from discord.ext import commands
-from discord.utils import get
 from mcstatus import JavaServer
-from discord.ui import Button, View
 import matplotlib.pyplot as plt
 
 workdir = os.getcwd()
@@ -14,6 +10,7 @@ if '/' in workdir:
 else:
     workdir = workdir + r"\\"
 
+guildid = #required
 bottoken = "" #required
 botid =  #required for chatbridge
 chatbridgechanid =  #required for mc to discord chatbridge
@@ -67,7 +64,7 @@ class aclient(discord.Client):
     async def on_ready(self):
         await self.wait_until_ready()
         if not self.synced:
-            await tree.sync(guild = discord.Object(id = 1003365626825408604))
+            await tree.sync(guild = discord.Object(id = guildid))
             self.synced = True
         activity = discord.Game(name="managing apes", type=3)
         await client.change_presence(status=discord.Status.online, activity=activity)
@@ -78,13 +75,10 @@ class aclient(discord.Client):
 client = aclient()
 tree = app_commands.CommandTree(client)
 
-#Guild = client.get_guild(id: 1003365626825408604, /) -> (Guild | None):
-#trial_member = utils.get(Guild.roles, name="Trial-Member")
-
 async def cbsend(msg):
    await chan.send(msg) 
 
-@tree.command(name = "test", description = "test", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "test", description = "test", guild = discord.Object(id = guildid))
 @app_commands.describe(names = "Names of random ppl.")
 @app_commands.choices(names = [
     discord.app_commands.Choice(name="Catniped", value=1),
@@ -109,7 +103,7 @@ def ping2(host,port,timeout=2):
 
 #planner
 
-@tree.command(name = "addstation", description = "Adds a station to the bolt network planner.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "addstation", description = "Adds a station to the bolt network planner.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, station: str, x: str, z: str, subnet: typing.Optional[str] = None) -> None:
     if subnet == None:
         subnet = -1
@@ -120,7 +114,7 @@ async def self(interaction: discord.Interaction, station: str, x: str, z: str, s
     embedVar = discord.Embed(title="Success!", description=f"**Successfully added station `{station}`!** ", color=0x34EB86)
     await interaction.response.send_message(embed=embedVar) # , view=view
 
-@tree.command(name = "stationlist", description = "Shows a list of added stations.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "stationlist", description = "Shows a list of added stations.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction):
     await interaction.response.defer()
     msg = ""
@@ -137,7 +131,7 @@ async def self(interaction: discord.Interaction):
     await interaction.followup.send(embed=embedVar)
     csv_file.close()
 
-@tree.command(name = "deletestation", description = "Deletes a station.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "deletestation", description = "Deletes a station.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, station: str):
     await interaction.response.defer()
     with open('stations.csv', 'r') as inp, open('stationsout.csv', 'w') as out:
@@ -150,7 +144,7 @@ async def self(interaction: discord.Interaction, station: str):
     embedVar = discord.Embed(title="Success!", description=f"**Successfully deleted station `{station}`!**", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "setsubnet", description = "Sets a stations subnet.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "setsubnet", description = "Sets a stations subnet.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, station: str, subnet: str):
     await interaction.response.defer()
     with open('stations.csv', 'r') as inp, open('stationsout.csv', 'w') as out:
@@ -166,7 +160,7 @@ async def self(interaction: discord.Interaction, station: str, subnet: str):
     embedVar = discord.Embed(title="Success!", description=f"**Successfully changed the subnet of `{station}` to `{subnet}`!** ", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "resetsubnet", description = "Resets a stations subnet. ", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "resetsubnet", description = "Resets a stations subnet. ", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, station: str):
     await interaction.response.defer()
     with open('stations.csv', 'r') as inp, open('stationsout.csv', 'w') as out:
@@ -182,7 +176,7 @@ async def self(interaction: discord.Interaction, station: str):
     embedVar = discord.Embed(title="Success!", description=f"**Successfully reset the subnet of `{station}`!** ", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "resetallsubnets", description = "Resets every stations subnet. ", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "resetallsubnets", description = "Resets every stations subnet. ", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction):
     await interaction.response.defer()
     with open('stations.csv', 'r') as inp, open('stationsout.csv', 'w') as out:
@@ -195,12 +189,12 @@ async def self(interaction: discord.Interaction):
     embedVar = discord.Embed(title="Success!", description=f"**Successfully reset the subnets of all stations!** ", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "addsubnet", description = "*wip* Adds a subnet to the bolt network planner.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "addsubnet", description = "*wip* Adds a subnet to the bolt network planner.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, name: str, colour: str):
     embedVar = discord.Embed(title="Success! (this does not actually do anything)", description=f"**Successfully added subnet `{name}`!** ", color=colour)
     await interaction.response.send_message(embed=embedVar)
 
-@tree.command(name = "plan", description = "Generates a plan of the bolt network.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "plan", description = "Generates a plan of the bolt network.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction):
     await interaction.response.defer()
     sorted_stations = []
@@ -218,7 +212,7 @@ async def self(interaction: discord.Interaction):
 
 #todolist
 
-@tree.command(name = "addtask", description = "Adds a task to the todo list.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "addtask", description = "Adds a task to the todo list.", guild = discord.Object(id = guildid))
 @app_commands.describe(priority = "The priority of the task.")
 @app_commands.choices(priority = [
     discord.app_commands.Choice(name="high", value=1),
@@ -235,7 +229,7 @@ async def self(interaction: discord.Interaction, name: str, priority: discord.ap
     embedVar = discord.Embed(title="Success!", description=f"**Successfully added task `{name}`!** ", color=0x34EB86)
     await interaction.response.send_message(embed=embedVar)
 
-@tree.command(name = "edittask", description = "Edits a task on the todo list.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "edittask", description = "Edits a task on the todo list.", guild = discord.Object(id = guildid))
 @app_commands.describe(priority = "The priority of the task.")
 @app_commands.choices(priority = [
     discord.app_commands.Choice(name="high", value=1),
@@ -268,7 +262,7 @@ async def self(interaction: discord.Interaction, task: str, tag: typing.Optional
     embedVar = discord.Embed(title="Success!", description=f"**Successfully applied edits to task `{task}`!** ", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "todolist", description = "Shows the todolist.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "todolist", description = "Shows the todolist.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction):
     await interaction.response.defer()
     hmsg = ""
@@ -303,7 +297,7 @@ async def self(interaction: discord.Interaction):
     await interaction.followup.send(embed=embedVar)
     csv_file.close()
 
-@tree.command(name = "deletetask", description = "Deletes a todo task (use /markdone to mark tasks as done).", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "deletetask", description = "Deletes a todo task (use /markdone to mark tasks as done).", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, task: str):
     await interaction.response.defer()
     with open('todo.csv', 'r') as inp, open('todoout.csv', 'w') as out:
@@ -320,7 +314,7 @@ async def self(interaction: discord.Interaction, task: str):
     embedVar = discord.Embed(title="Success!", description=f"**Successfully deleted task `{task}`!**", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "markdone", description = "Marks a todo task as done.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "markdone", description = "Marks a todo task as done.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, task: str):
     await interaction.response.defer()
     out2 = open('tododone.csv', 'a')
@@ -342,7 +336,7 @@ async def self(interaction: discord.Interaction, task: str):
     embedVar = discord.Embed(title="Success!", description=f"**Successfully marked task `{task}` as done!**", color=0x34EB86)
     await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "donelist", description = "Shows the list of done todo tasks.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "donelist", description = "Shows the list of done todo tasks.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction):
     await interaction.response.defer()
     msg = ""
@@ -359,7 +353,7 @@ async def self(interaction: discord.Interaction):
     await interaction.followup.send(embed=embedVar)
     csv_file.close()
 
-@tree.command(name = "taskinfo", description = "Shows the additional info about a todo task.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "taskinfo", description = "Shows the additional info about a todo task.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction, task: str):
     await interaction.response.defer()
     msg = ""
@@ -387,7 +381,7 @@ async def self(interaction: discord.Interaction, task: str):
 
 #server
 
-@tree.command(name = "ping", description = "Pings the servers to check their status.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "ping", description = "Pings the servers to check their status.", guild = discord.Object(id = guildid))
 async def self(interaction: discord.Interaction):
         await interaction.response.defer()
         embedVar = discord.Embed(title="Ping information", description=f"", color=0xF56C42)
@@ -421,7 +415,7 @@ async def self(interaction: discord.Interaction):
             embedVar.add_field(name="CMP", value=f"CMP is `offline`", inline=False)
         await interaction.followup.send(embed=embedVar)
 
-@tree.command(name = "execute", description = "Executes a command on one of the servers.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "execute", description = "Executes a command on one of the servers.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(administrator = True)
 @app_commands.describe(server = "The server to execute the command on.")
 @app_commands.choices(server = [
@@ -439,13 +433,13 @@ async def self(interaction: discord.Interaction, server: discord.app_commands.Ch
             rconpass = smprconpass
         with MCRcon("129.146.186.215", f"{rconpass}", port=server2) as mcr:
             resp = mcr.command(f"{command}")
-        embedVar1 = discord.Embed(title="Command executed", description=f"Successfully executed `{command}` on `{server.name}`\n`{resp}`", color=0xFF0068)
+        embedVar1 = discord.Embed(title="Command executed", description=f"Successfully executed `{command}` on `{server.name}`\n`{resp}`", color=0x34EB86)
         await interaction.followup.send(embed=embedVar1)
     except:
         embedVar2 = discord.Embed(title="Command failed", description=f"Failed to execute command `{command}` on `{server.name}`", color=0xFF0037)
         await interaction.followup.send(embed=embedVar2)
 
-@tree.command(name = "backup", description = "Creates a backup of smp.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "backup", description = "Creates a backup of smp.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction, backupname: typing.Optional[str] = None) -> None:
     await interaction.response.defer()
@@ -459,7 +453,7 @@ async def self(interaction: discord.Interaction, backupname: typing.Optional[str
     embedVar2 = discord.Embed(title="Backup made", description=f"Successfully created a backup of smp", color=0x34EB86)
     await interaction.followup.send(embed=embedVar2)
 
-@tree.command(name = "backuplist", description = "Shows the list of backups for smp.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "backuplist", description = "Shows the list of backups for smp.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     resp = ""
@@ -473,7 +467,7 @@ async def self(interaction: discord.Interaction):
 
 paths = [workdir, smppath, cmppath]
 
-@tree.command(name = "deletefile", description = "Deletes a file in one of the directories", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "deletefile", description = "Deletes a file in one of the directories", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(administrator = True)
 @app_commands.describe(directory = "The directory to delete a file in.")
 @app_commands.choices(directory = [
@@ -491,35 +485,35 @@ async def self(interaction: discord.Interaction, file: str, directory: discord.a
         embedVar1 = discord.Embed(title="Error", description=f"File `{path1}/{file}` doesnt exist.", color=0xFF0037)
     await interaction.followup.send(embed=embedVar1)
 
-@tree.command(name = "startcmp", description = "Starts CMP.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "startcmp", description = "Starts CMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Starting...", description=f"Startup of cmp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
     await startcmpm()
 
-@tree.command(name = "stopcmp", description = "Stops CMP.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "stopcmp", description = "Stops CMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Stopping...", description=f"Startup of cmp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
     cmps.terminate()
 
-@tree.command(name = "startsmp", description = "Starts SMP.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "startsmp", description = "Starts SMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Starting...", description=f"Startup of smp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
     await startsmpm()
 
-@tree.command(name = "stopsmp", description = "Stops SMP.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "stopsmp", description = "Stops SMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Stopping...", description=f"Startup of smp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
     smps.terminate()
 
-@tree.command(name = "stop", description = "Stops the bot.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "stop", description = "Stops the bot.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(administrator = True)
 async def self(interaction: discord.Interaction):
     try:
@@ -534,7 +528,13 @@ async def self(interaction: discord.Interaction):
 async def on_message(message: discord.Message):
     if message.channel == chan:
         if message.author.id != botid:
-            outdc = "/tellraw @a [\"\",{\"text\":\"[Discord]\",\"color\":\"dark_gray\"},{\"text\":\" " + message.author.name + ": \",\"bold\":true,\"color\":\"blue\"},{\"text\":\"" + message.content + "\",\"color\":\"gray\"}]"
+            reply = None
+            reply = message.reference
+            if reply is not None:
+                message2 = reply.resolved
+                outdc = "/tellraw @a [\"\",{\"text\":\"[Discord]\",\"color\":\"dark_gray\"},{\"text\":\" " + message.author.name + ": \",\"bold\":true,\"color\":\"blue\"},{\"text\":\"" + message.content + "\",\"color\":\"gray\"},{\"text\":\" ->\",\"color\":\"dark_gray\"},{\"text\":\" " + message2.author.name + ": \",\"bold\":true,\"color\":\"blue\"},{\"text\":\"" + message2.content + "\",\"color\":\"gray\"}]"
+            else:
+                outdc = "/tellraw @a [\"\",{\"text\":\"[Discord]\",\"color\":\"dark_gray\"},{\"text\":\" " + message.author.name + ": \",\"bold\":true,\"color\":\"blue\"},{\"text\":\"" + message.content + "\",\"color\":\"gray\"}]"
             await smpcomm(outdc)
             await cmpcomm(outdc)
 
@@ -550,8 +550,7 @@ async def startcmpm():
             try:
                 line = data.decode('ascii').rstrip()
             except:
-                cmps.terminate()
-                break
+                continue
             if line != "":
                 cmdline = line.split()
                 if len(cmdline) >= 3:
@@ -588,8 +587,7 @@ async def startsmpm():
             try:
                 line = data.decode().rstrip()
             except:
-                smps.terminate()
-                break
+                continue
             if line != "":
                 cmdline = line.split()
                 if len(cmdline) >= 3:
@@ -616,7 +614,7 @@ async def smpcomm(inp):
         resp = mcr.command(f"{inp}")
         print(resp)
 
-@tree.command(name = "stat", description = "Shows some stats from smp.", guild = discord.Object(id = 1003365626825408604))
+@tree.command(name = "stat", description = "Shows some stats from smp.", guild = discord.Object(id = guildid))
 @app_commands.describe(mode = "Stat display mode.")
 @app_commands.choices(mode = [
     discord.app_commands.Choice(name="Total", value=1),
@@ -676,4 +674,17 @@ async def self(interaction: discord.Interaction, stype: str, stat: str, mode: di
         print(type(sscoredict[0]))
  """    
     
+@tree.command(name = "serverinfo", description = "Displays server hardware usage data.", guild = discord.Object(id = guildid))
+async def self(interaction: discord.Interaction):
+    await interaction.response.defer()
+    cpuperc = psutil.cpu_percent(interval=1)
+    vmem = psutil.virtual_memory()
+    diskmem = psutil.disk_usage('/')
+    embedVar = discord.Embed(title="System info", color=0xF56C42)
+    embedVar.add_field(name="CPU", value=f"Usage: `{cpuperc}%`", inline=False)
+    embedVar.add_field(name="RAM", value=f"Usage: `{vmem.percent}%`", inline=False)
+    embedVar.add_field(name="Disk", value=f"Usage: `{diskmem.percent}%`", inline=False)
+    await interaction.followup.send(embed=embedVar)
+
 client.run(bottoken)
+
