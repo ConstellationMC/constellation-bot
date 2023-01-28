@@ -213,6 +213,7 @@ async def self(interaction: discord.Interaction):
 #todolist
 
 @tree.command(name = "addtask", description = "Adds a task to the todo list.", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
 @app_commands.describe(priority = "The priority of the task.")
 @app_commands.choices(priority = [
     discord.app_commands.Choice(name="high", value=1),
@@ -230,6 +231,7 @@ async def self(interaction: discord.Interaction, name: str, priority: discord.ap
     await interaction.response.send_message(embed=embedVar)
 
 @tree.command(name = "edittask", description = "Edits a task on the todo list.", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
 @app_commands.describe(priority = "The priority of the task.")
 @app_commands.choices(priority = [
     discord.app_commands.Choice(name="high", value=1),
@@ -298,6 +300,7 @@ async def self(interaction: discord.Interaction):
     csv_file.close()
 
 @tree.command(name = "deletetask", description = "Deletes a todo task (use /markdone to mark tasks as done).", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction, task: str):
     await interaction.response.defer()
     with open('todo.csv', 'r') as inp, open('todoout.csv', 'w') as out:
@@ -574,7 +577,8 @@ async def startcmpm():
 
 async def cmpcomm(inp):
     with MCRcon(cmpip, cmprconpass, port=cmprconport) as mcr:
-        mcr.command(f"{inp}")
+        resp = mcr.command(f"{inp}")
+        return(resp)
 
 async def startsmpm():
     smpready = False
@@ -612,7 +616,7 @@ async def startsmpm():
 async def smpcomm(inp):
     with MCRcon(smpip, smprconpass, port=smprconport) as mcr:
         resp = mcr.command(f"{inp}")
-        print(resp)
+        return(resp)
 
 @tree.command(name = "stat", description = "Shows some stats from smp.", guild = discord.Object(id = guildid))
 @app_commands.describe(mode = "Stat display mode.")
@@ -685,6 +689,117 @@ async def self(interaction: discord.Interaction):
     embedVar.add_field(name="RAM", value=f"Usage: `{vmem.percent}%`", inline=False)
     embedVar.add_field(name="Disk", value=f"Usage: `{diskmem.percent}%`", inline=False)
     await interaction.followup.send(embed=embedVar)
+
+# scripting
+
+@tree.command(name = "addscript", description = "Creates a new script", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
+async def self(interaction: discord.Interaction, name: str, description: typing.Optional[str] = None) -> None:
+    scriptmd = [f"{name}", f"{description}"]
+    with open('scripti.csv', 'a+', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(scriptmd)
+    c = open(f"scripts\{name}.csc", "w")
+    c.close()
+    embedVar = discord.Embed(title="Success!", description=f"**Successfully added script `{name}`!** ", color=0x34EB86)
+    await interaction.response.send_message(embed=embedVar)
+
+@tree.command(name = "scriptinfo", description = "Shows the info about a script.", guild = discord.Object(id = guildid))
+async def self(interaction: discord.Interaction, name: str):
+    await interaction.response.defer()
+    msg = ""
+    with open('scripti.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+            else:
+                if row[0] == name:
+                    embedVar = discord.Embed(title=f"{row[0]}", color=0xDA42F5)
+                    embedVar.add_field(name="Description", value=f"{row[1]}", inline=False)
+                line_count += 1
+        filelist = os.listdir(workdir + "\scripts")
+        for x in filelist:
+            if x.startswith(name):
+                with open(f"scripts\{name}.csc", "r") as f:
+                    scriptcont = f.read()
+                    embedVar.add_field(name="Content", value=f"```{scriptcont}```", inline=False)
+        await interaction.followup.send(embed=embedVar)
+
+@tree.command(name = "addline", description = "Adds a line to a script.", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
+async def self(interaction: discord.Interaction, scriptname: str, line: str):
+    await interaction.response.defer()
+    with open(f"scripts\{scriptname}.csc", "a+") as c:
+        c.write(f"{line}\n")
+    embedVar = discord.Embed(title="Success!", description=f"**Successfully added line `{line}` to script `{scriptname}`!** ", color=0x34EB86)
+    await interaction.followup.send(embed=embedVar)
+
+@tree.command(name = "deleteline", description = "Deletes a line from a script.", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
+async def self(interaction: discord.Interaction, scriptname: str, linenumber: int):
+    await interaction.response.defer()
+    with open(f'scripts\{scriptname}.csc', 'r') as inp, open(r'scripts\tempscript.csv', 'w') as out:
+        linels = inp.readlines()
+        linels.pop(linenumber)
+        out.writelines(linels)
+    os.remove(f"scripts\{scriptname}.csc")
+    os.rename(fr"{workdir}scripts\tempscript.csv", fr"{workdir}scripts\{scriptname}.csc")
+    embedVar = discord.Embed(title="Success!", description=f"**Successfully deleted line `{linenumber}` in script `{scriptname}`!**", color=0x34EB86)
+    await interaction.followup.send(embed=embedVar)
+
+@tree.command(name = "scriptlist", description = "Shows a list of availible scripts.", guild = discord.Object(id = guildid))
+async def self(interaction: discord.Interaction):
+    await interaction.response.defer()
+    filelist = os.listdir(workdir + "\scripts")
+    resp = ", ".join(filelist)
+    embedVar = discord.Embed(title="Script list", description=f"`{resp}`", color=0xDA42F5)
+    await interaction.followup.send(embed=embedVar)
+
+@tree.command(name = "deletescript", description = "Deletes a script.", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
+async def self(interaction: discord.Interaction, scriptname: str):
+    await interaction.response.defer()
+    os.remove(workdir + f"\scripts\{scriptname}.csc")
+    embedVar = discord.Embed(title="Success!", description=f"Successfully deleted script `{scriptname}`!", color=0x34EB86)
+    await interaction.followup.send(embed=embedVar)
+
+@tree.command(name = "runscript", description = "Runs a script.", guild = discord.Object(id = guildid))
+@app_commands.default_permissions(manage_messages = True)
+@app_commands.describe(server = "The server on which the script will be executed")
+@app_commands.choices(server = [
+    discord.app_commands.Choice(name="SMP", value=1),
+    discord.app_commands.Choice(name="CMP", value=2),
+])
+async def self(interaction: discord.Interaction, scriptname: str, server: discord.app_commands.Choice[int], debug: bool = False):
+    await interaction.response.defer()
+    debugstr = ""
+    embedVar1 = discord.Embed(title="Starting script", description=f"Starting script `{scriptname}` on `{server.name}` (debug mode: `{debug}`)!", color=0xDA42F5)
+    await interaction.followup.send(embed=embedVar1)
+    with open(f'scripts\{scriptname}.csc', 'r') as script:
+        instructions = script.readlines()
+        for instr in instructions:
+            if instr.startswith("!"):
+                spinstr = instr.split()
+                if spinstr[0] == "!wait":
+                    time.sleep(int(spinstr[1]))
+                else:
+                    embedVar = discord.Embed(title="Script failed", description=f"`{spinstr[0]}` is not a valid command.", color=0xFF0037)
+                    await interaction.followup.send(embed=embedVar)
+            else:
+                resp = " "
+                if server.value == 1:
+                    resp = await smpcomm(instr)
+                elif server.value == 2:
+                    resp = await cmpcomm(instr)
+                if debug is True:
+                    debugstr += resp + "\n"
+
+        embedVar = discord.Embed(title="Script executed!", description=f"Successfully executed script `{scriptname}`!", color=0x34EB86)
+        if debug is True:
+            embedVar.add_field(name="Debug log", value=f"`{debugstr}`", inline=False)
+        await interaction.followup.send(embed=embedVar)
 
 client.run(bottoken)
 

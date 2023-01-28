@@ -20,12 +20,13 @@ Available commands
 | stop | None | Stops the bot. |
 | stat | stype*, stat*, mode*, pname | Checks the stat files for smp and returns a specified statistic. |
 | deletefile | directory*, file* | Deletes a file in one of the important directories. |
+| serverinfo | None | Displays server hardware usage data. |
 
 **To-do**
 *These commands are used to manage the todolist for projects*
 | Name | Arguments | Description |
 | ----------- | ----------- | ----------- |
-| addtask | name*, priority*, tag, description, attachment | Pings the servers to check their status/mspt/tps. |
+| addtask | name*, priority*, tag, description, attachment | Adds a task to the todolist. |
 | edittask | task*, priority, tag, description, attachment | Edits the value of a task. |
 | todolist | None | Shows the todolist. |
 | deletetask | task* | Deletes a task. |
@@ -33,7 +34,19 @@ Available commands
 | donelist | None | Shows the list of done tasks. |
 | taskinfo | task* | Shows all the info about a task. |
 
-*Bolt network planner + scripting commands not included as they are wip, reffer to the slash commands menu in the discord client if you wish to use them*
+**Scripting**
+*These commands are used to interact with custom scripts*
+| Name | Arguments | Description |
+| ----------- | ----------- | ----------- |
+| addscript | name*, description | Creates a script. |
+| addline | scriptname*, line* | Adds a line to a script. |
+| deleteline | scriptname*, linenumber* | Deletes a line from a script |
+| deletescript | scriptname* | Deletes a script. |
+| runscript | scriptname*, server*, debug | Runs a script. |
+| scriptlist | None | Shows the list of availible scripts. |
+| scriptinfo | name* | Shows all the info about a script. |
+
+*Bolt network planner commands not included as they are wip, reffer to the slash commands menu in the discord client if you wish to use them*
 
 **: required*
 
@@ -68,7 +81,7 @@ Planned features
 - [x] add reply in mc feature
 
 **scripting**
-- [ ] add command for creating scripts, adding lines to scripts, deleting lines from scripts, deleting scripts, running scripts, listing scripts, adding descriptions, showing script info
+- [x] add command for creating scripts, adding lines to scripts, deleting lines from scripts, deleting scripts, running scripts, listing scripts, adding descriptions, showing script info
 
 **others**
 - [ ] "n days since someone broke the constellation bot" status
