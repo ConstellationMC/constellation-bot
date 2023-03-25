@@ -1,4 +1,4 @@
-import time, discord, socket, subprocess, json, os, csv, random, typing, asyncio, mojang, psutil
+import time, discord, socket, subprocess, json, os, csv, random, typing, asyncio, mojang, psutil, tomllib
 from mcrcon import MCRcon
 from discord import *
 from mcstatus import JavaServer
@@ -10,18 +10,23 @@ if '/' in workdir:
 else:
     workdir = workdir + r"\\"
 
-guildid = #required
-bottoken = "" #required
-botid =  #required for chatbridge
-chatbridgechanid =  #required for mc to discord chatbridge
-smppath = r"" #required for smp out chatbridge, stat command
-cmppath = r"" #required for cmp out chatbridge
-smprconpass = "" #required for smp in chatbridge, execute smp command, ping command
-cmprconpass = "" #required for cmp in chatbridge, execute cmp command, ping command
-smpip = "" #required for smp in chatbridge, execute smp command, ping command
-cmpip = "" #required for cmp in chatbridge, execute cmp command, ping command
-smprconport =  #required for smp in chatbridge, execute cmp command, ping command
-cmprconport =  #required for cmp in chatbridge, execute cmp command, ping command
+with open("config.toml", "rb") as f:
+    config = tomllib.load(f)
+
+guildid = config["guildid"] #required
+bottoken = config["bottoken"] #required
+botid = config["botid"] #required for chatbridge
+chatbridgechanid = config["chatbridgechanid"] #required for mc to discord chatbridge
+smppath = config["smppath"] #required for smp out chatbridge, stat command
+cmppath = config["cmppath"] #required for cmp out chatbridge
+smprconpass = config["smprconpass"] #required for smp in chatbridge, execute smp command, ping command
+cmprconpass = config["cmprconpass"] #required for cmp in chatbridge, execute cmp command, ping command
+smpip = config["smpip"] #required for smp in chatbridge, execute smp command, ping command
+cmpip = config["cmpip"] #required for cmp in chatbridge, execute cmp command, ping command
+smprconport = config["smprconport"] #required for smp in chatbridge, execute cmp command, ping command
+cmprconport = config["cmprconport"] #required for cmp in chatbridge, execute cmp command, ping command
+smpport = config["smpport"] #required for ping
+cmpport = config["cmpport"] #required for ping
 
 plt.style.use('dark_background')
 plt.title('Bolt Network Plan')
@@ -389,7 +394,7 @@ async def self(interaction: discord.Interaction):
         await interaction.response.defer()
         embedVar = discord.Embed(title="Ping information", description=f"", color=0xF56C42)
         try:
-            smp2 = JavaServer.lookup("129.146.186.215:25565")
+            smp2 = JavaServer.lookup(smpip + ":" + smpport)
             smpstatus = smp2.status()
             smpquery = smp2.query()
             with MCRcon(smpip, smprconpass, port=smprconport) as mcr:
@@ -403,7 +408,7 @@ async def self(interaction: discord.Interaction):
         except ConnectionRefusedError:
             embedVar.add_field(name="SMP", value=f"SMP is `offline`", inline=False)
         try:
-            cmp2 = JavaServer.lookup("129.146.186.215:25566")
+            cmp2 = JavaServer.lookup(cmpip+":"+cmpport)
             cmpstatus = cmp2.status()
             cmpquery = cmp2.query()
             with MCRcon(cmpip, cmprconpass, port=cmprconport) as mcr:
@@ -429,12 +434,14 @@ async def self(interaction: discord.Interaction, server: discord.app_commands.Ch
     await interaction.response.defer()
     try:
         if server.name == "cmp":
-            server2 = cmprconport
+            port2 = cmprconport
             rconpass = cmprconpass
+            server2 = cmpip
         elif server.name == "smp":
-            server2 = smprconport
+            port2 = smprconport
             rconpass = smprconpass
-        with MCRcon("129.146.186.215", f"{rconpass}", port=server2) as mcr:
+            server2 = smpip
+        with MCRcon(server2, rconpass, port=port2) as mcr:
             resp = mcr.command(f"{command}")
         embedVar1 = discord.Embed(title="Command executed", description=f"Successfully executed `{command}` on `{server.name}`\n`{resp}`", color=0x34EB86)
         await interaction.followup.send(embed=embedVar1)
@@ -447,7 +454,7 @@ async def self(interaction: discord.Interaction, server: discord.app_commands.Ch
 async def self(interaction: discord.Interaction, backupname: typing.Optional[str] = None) -> None:
     await interaction.response.defer()
     if backupname is not None:
-        await asyncio.create_subprocess_shell(f"zip -r {backupname}.zip world", cwd=smppath)
+        proc = await asyncio.create_subprocess_shell(f"zip -r {backupname}.zip world", cwd=smppath)
     else:
         proc = await asyncio.create_subprocess_shell(f"zip -r backup.zip world", cwd=smppath)
     embedVar1 = discord.Embed(title="Starting backup...", description=f"Started a backup of smp!", color=0xFF0068)
@@ -494,13 +501,13 @@ async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Starting...", description=f"Startup of cmp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
     await startcmpm()
-
+"""
 @tree.command(name = "stopcmp", description = "Stops CMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Stopping...", description=f"Startup of cmp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
-    cmps.terminate()
+    cmps.terminate()"""
 
 @tree.command(name = "startsmp", description = "Starts SMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
@@ -508,13 +515,13 @@ async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Starting...", description=f"Startup of smp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
     await startsmpm()
-
+"""
 @tree.command(name = "stopsmp", description = "Stops SMP.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(manage_messages = True)
 async def self(interaction: discord.Interaction):
     embedVar1 = discord.Embed(title="Stopping...", description=f"Startup of smp initialized!", color=0xFF0068)
     await interaction.response.send_message(embed=embedVar1)
-    smps.terminate()
+    smps.terminate()"""
 
 @tree.command(name = "stop", description = "Stops the bot.", guild = discord.Object(id = guildid))
 @app_commands.default_permissions(administrator = True)
